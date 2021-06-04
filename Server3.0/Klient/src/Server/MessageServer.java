@@ -85,14 +85,14 @@ public class MessageServer extends Thread  {
         private ObjectInputStream ois;
         private ObjectOutputStream oos;
 
-       public Client(Socket socket) throws IOException, ClassNotFoundException {
+        public Client(Socket socket) throws IOException, ClassNotFoundException {
             this.socket = socket;
-       }
+        }
 
         @Override
         public void run() {
             try {
-                ois =  new ObjectInputStream(socket.getInputStream());
+                ois = new ObjectInputStream(socket.getInputStream());
                 oos = new ObjectOutputStream(socket.getOutputStream());
                 while (true) {
 
@@ -101,21 +101,21 @@ public class MessageServer extends Thread  {
                     recivers = message.getReceiverList();
 //                    System.out.println("Read object");
 
-                    if (message.getText().equals("Connect")){
-                    connectedClient(message);
+                    if (message.getText().equals("Connect")) {
+                        connectedClient(message);
                     }
 
-                    if (message.getText().equals("ActiveUsers")){
+                    if (message.getText().equals("ActiveUsers")) {
                         activeUsers(oos);
                     }
 
-                    if (message.getText().equals("Exit")){
+                    if (message.getText().equals("Exit")) {
                         exitClient(message);
 
                     }
 
-                    if (recivers!= null) {
-                        noReceivers(oos,message);
+                    if (recivers != null) {
+                        noReceivers(oos, message);
 //                        System.out.println("Message traffic");
 
                     }
@@ -126,11 +126,11 @@ public class MessageServer extends Thread  {
             }
         }
 
-        public void connectedClient(Message message)throws IOException, ClassNotFoundException{
+        public void connectedClient(Message message) throws IOException, ClassNotFoundException {
             trafficLog.info("User " + message.getUser().getUserName() + " connected");
-            clients.put(message.getUser(),this);
+            clients.put(message.getUser(), this);
 
-            ArrayList <Message> pendingMessages = unsendMessages.getArrayList(message.getUser());
+            ArrayList<Message> pendingMessages = unsendMessages.getArrayList(message.getUser());
             if (pendingMessages != null) {
                 for (Message m : pendingMessages) {
                     trafficLog.info("Sending unsent messages to " + message.getUser().getUserName());
@@ -143,44 +143,44 @@ public class MessageServer extends Thread  {
                 unsendMessages.remove(message.getUser());
             }
         }
-    }//class
+        //class
 
-    private void noReceivers(ObjectOutputStream oos, Message message) throws IOException {
-        for (User user: recivers) {
-            for (User key: clients.clients.keySet()) {
-                if (user.equals(key)) {
-                    oos = clients.get(user).oos;
-                    oos.writeObject(message);
+        private void noReceivers(ObjectOutputStream oos, Message message) throws IOException {
+            for (User user : recivers) {
+                for (User key : clients.clients.keySet()) {
+                    if (user.equals(key)) {
+                        oos = clients.get(user).oos;
+                        oos.writeObject(message);
 
-                    oos.flush();
-                    trafficLog.info("Message from " + message.getUser().getUserName() +
-                            " sent to " + user.getUserName());
-                }
-                else {
-                    unsendMessages.put(user, message);
-                    trafficLog.info("Message from " + message.getUser().getUserName() +
-                            " added to unsent list for " + user.getUserName());
+                        oos.flush();
+                        trafficLog.info("Message from " + message.getUser().getUserName() +
+                                " sent to " + user.getUserName());
+                    } else {
+                        unsendMessages.put(user, message);
+                        trafficLog.info("Message from " + message.getUser().getUserName() +
+                                " added to unsent list for " + user.getUserName());
+                    }
                 }
             }
         }
-    }
 
-    private void exitClient(Message message) throws IOException {
-        socket.close();
-        clients.Remove(message.getUser());
-        trafficLog.info("User " + message.getUser() + " has disconnected.");
-    }
-
-    private void activeUsers(ObjectOutputStream oos) throws IOException, ClassNotFoundException {
-
-        for (User key: clients.clients.keySet()) {
-            list.add(key);
+        private void exitClient(Message message) throws IOException {
+            socket.close();
+            clients.Remove(message.getUser());
+            trafficLog.info("User " + message.getUser() + " has disconnected.");
         }
 
-        oos.writeObject(list);
-        trafficLog.info("Active users list sent.");
+        private void activeUsers(ObjectOutputStream oos) throws IOException, ClassNotFoundException {
 
-        list.clear();
+            for (User key : clients.clients.keySet()) {
+                list.add(key);
+            }
+
+            oos.writeObject(list);
+            trafficLog.info("Active users list sent.");
+
+            list.clear();
+        }
     }
 
     private class Clients implements Serializable {
