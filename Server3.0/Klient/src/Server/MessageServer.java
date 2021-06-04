@@ -102,66 +102,22 @@ public class MessageServer extends Thread  {
 //                    System.out.println("Read object");
 
                     if (message.getText().equals("Connect")){
-                        trafficLog.info("User " + message.getUser().getUserName() + " connected");
-                        clients.put(message.getUser(),this);
-//                        System.out.println("User connected: " + message.getUser());
-
-                        ArrayList <Message> pendingMessages = unsendMessages.getArrayList(message.getUser());
-                        if (pendingMessages != null) {
-                            for (Message m : pendingMessages) {
-                                trafficLog.info("Sending unsent messages to " + message.getUser().getUserName());
-                                oos = clients.get(message.getUser()).oos;
-                                oos.writeObject(m);
-                                oos.flush();
-                                trafficLog.info("Message from " + m.getUser().getUserName() +
-                                        " sent to " + message.getUser().getUserName());
-                            }
-                            unsendMessages.remove(message.getUser());
-                        }
+                    connectedClient(message);
                     }
 
                     if (message.getText().equals("ActiveUsers")){
-
-//                        System.out.println("User list called");
-                        for (User key: clients.clients.keySet()) {
-                            list.add(key);
-                        }
-//                        System.out.println("Startar skickning av lista");
-                        oos.writeObject(list);
-                        trafficLog.info("Active users list sent.");
-
-//                        System.out.println("Lista skickad");
-                        list.clear();
+                        activeUsers(oos);
                     }
 
                     if (message.getText().equals("Exit")){
-                        socket.close();
-                        clients.Remove(message.getUser());
-                        trafficLog.info("User " + message.getUser() + " has disconnected.");
+                        exitClient(message);
+
                     }
 
                     if (recivers!= null) {
-
+                        noReceivers(oos,message);
 //                        System.out.println("Message traffic");
-                        for (User user: recivers) {
-                            for (User key: clients.clients.keySet()) {
-                                if (user.equals(key)) {
-                                    oos = clients.get(user).oos;
-                                    oos.writeObject(message);
-//                                    System.out.println("Message = "+message.getText());
-//                                    System.out.println("Message sent by = "+message.getUser().getUserName());
-                                    oos.flush();
-                                    trafficLog.info("Message from " + message.getUser().getUserName() +
-                                            " sent to " + user.getUserName());
-//                                    System.out.println("Message sent ");
-                                }
-                                else {
-                                    unsendMessages.put(user, message);
-                                    trafficLog.info("Message from " + message.getUser().getUserName() +
-                                            " added to unsent list for " + user.getUserName());
-                                }
-                            }
-                        }
+
                     }
                 }
             } catch (IOException | ClassNotFoundException e) {
@@ -169,7 +125,63 @@ public class MessageServer extends Thread  {
                 disconnect();
             }
         }
+
+        public void connectedClient(Message message)throws IOException, ClassNotFoundException{
+            trafficLog.info("User " + message.getUser().getUserName() + " connected");
+            clients.put(message.getUser(),this);
+
+            ArrayList <Message> pendingMessages = unsendMessages.getArrayList(message.getUser());
+            if (pendingMessages != null) {
+                for (Message m : pendingMessages) {
+                    trafficLog.info("Sending unsent messages to " + message.getUser().getUserName());
+                    oos = clients.get(message.getUser()).oos;
+                    oos.writeObject(m);
+                    oos.flush();
+                    trafficLog.info("Message from " + m.getUser().getUserName() +
+                            " sent to " + message.getUser().getUserName());
+                }
+                unsendMessages.remove(message.getUser());
+            }
+        }
     }//class
+
+    private void noReceivers(ObjectOutputStream oos, Message message) throws IOException {
+        for (User user: recivers) {
+            for (User key: clients.clients.keySet()) {
+                if (user.equals(key)) {
+                    oos = clients.get(user).oos;
+                    oos.writeObject(message);
+
+                    oos.flush();
+                    trafficLog.info("Message from " + message.getUser().getUserName() +
+                            " sent to " + user.getUserName());
+                }
+                else {
+                    unsendMessages.put(user, message);
+                    trafficLog.info("Message from " + message.getUser().getUserName() +
+                            " added to unsent list for " + user.getUserName());
+                }
+            }
+        }
+    }
+
+    private void exitClient(Message message) throws IOException {
+        socket.close();
+        clients.Remove(message.getUser());
+        trafficLog.info("User " + message.getUser() + " has disconnected.");
+    }
+
+    private void activeUsers(ObjectOutputStream oos) throws IOException, ClassNotFoundException {
+
+        for (User key: clients.clients.keySet()) {
+            list.add(key);
+        }
+
+        oos.writeObject(list);
+        trafficLog.info("Active users list sent.");
+
+        list.clear();
+    }
 
     private class Clients implements Serializable {
         private  HashMap<User, Client> clients =new HashMap<>();
