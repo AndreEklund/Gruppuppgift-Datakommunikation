@@ -19,17 +19,25 @@ public class MessageClient {
     private ArrayList<User> receiverList;
     private Socket socket;
     private ClientGui gui;
+    private ObjectOutputStream oos;
 
     private final PropertyChangeSupport change = new PropertyChangeSupport(this);
 
     public MessageClient() {
         contacts = new Contacts("files/contacts.dat");
-        messageList = new ArrayList<>();
+        messageList = new ArrayList<Message>();
         onlineList = new ArrayList<>();
         receiverList = new ArrayList<>();
-        currentUser = new User("faker",new ImageIcon());
+        currentUser = new User();
+
+        JFrame frame = new JFrame("Client UI");
+        frame.setLocation(200, 150);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gui = new ClientGui(this);
-        //ui
+        frame.add(gui);
+        frame.pack();
+        frame.setVisible(true);
+
 
     }
     public void viewMessage(int index) {
@@ -39,8 +47,16 @@ public class MessageClient {
         }
     }
 
+    /*public void viewMessage(int index) {
+        if (index >= 0 && index < messageList.size()) {
+            Message message = messageList.get(index);
+            gui.setMessage(message.getText(), message.getIcon());
+        }
+    }*/
+
     public void setOnlineList(ArrayList<User> onlineList) {
         this.onlineList = onlineList;
+        System.out.println("onlinelist set");
     }
 
     public User getCurrentUser() {
@@ -55,7 +71,6 @@ public class MessageClient {
 
     public void setUserName(String userName){
         currentUser.setUsername(userName);
-       // System.out.println(currentUser.getUserName());
     }
 
     public void setImage(ImageIcon imageIcon){
@@ -65,37 +80,51 @@ public class MessageClient {
     public void connect(String ip, int port) {
         try {
             socket = new Socket(ip, port);
-            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-            oos.writeObject(new Message(currentUser,null,currentUser.getUserName(),currentUser.getImage()));
+            oos = new ObjectOutputStream(socket.getOutputStream());
+            oos.writeObject(new Message(currentUser,null,"Connect",currentUser.getImage()));
+            oos.writeObject(new Message(currentUser,null,"ActiveUsers",currentUser.getImage()));
             new ReadThread(socket, this).start();
-            new WriteThread(socket, this). start();
+            new WriteThread(socket, this, oos). start();
         } catch (IOException e) {
             System.err.println(e);
         }
+    }
+
+    public ArrayList<Message> getMessageList() {
+        return messageList;
     }
 
     public void disconnect() {
         try {
+            oos.writeObject(new Message(currentUser,null,"Exit",null));
             socket.close();
             contacts.writeToFile();
         } catch (IOException e) {
-            System.err.println(e);
+            //System.err.println(e);
         }
     }
 
-    public void addMessage(Message message) {
+    //public void addMessage(Message message) {
+      //  messageList.add(message);
+        //updateMessageList();
+    //}
+    public void setMessageListGUI(Message message){
         messageList.add(message);
-        updateMessageList();
+        ArrayList<String> strMessageList = new ArrayList<>();
+        for (int i=0; i<messageList.size(); i++) {
+            strMessageList.add(messageList.get(i).getUser().getUserName() + " " + messageList.get(i).getDateReceived().toString());
+        }
+        gui.setMessageListGUI(strMessageList);
     }
 
     public void updateMessageList() {
-        String[] strMessageList = new String[messageList.size()];
+        ArrayList<Message> strMessageList = new ArrayList<>();
         Message message;
         for (int i = 0; i < messageList.size(); i++) {
-            message = messageList.get(i);
-            strMessageList[i] = message.getUser().getUserName() + " " + message.getDateReceived().toString();
+            //message = messageList.get(i);
+            //strMessageList.add(message);
         }
-        // skicka strMessageList till GUI:t
+       // gui.updateMessages(strMessageList);
     }
 
     public void updateOnlineList(ArrayList list) {
@@ -104,6 +133,10 @@ public class MessageClient {
 
 
     }
+    public void fetchActiveUsers(){
+        Message message = new Message(currentUser,null,"ActiveUsers",new ImageIcon());
+        change.firePropertyChange("message",null,message);
+    }
 
     public String[] getOnlineList() {
         String[] strOnlineList = new String[onlineList.size()];
@@ -111,16 +144,13 @@ public class MessageClient {
             strOnlineList[i] = onlineList.get(i).getUserName();;
             System.out.println(strOnlineList[i]);
         }
+        System.out.println("list get");
         return strOnlineList;
     }
 
-    public boolean sendMessage(String text, ImageIcon image) {
-        if (text != null && image != null) {
-            Message message = new Message(currentUser, receiverList, text, image);
-            change.firePropertyChange("message", null, message);
-            return true;
-        }
-        return false;
+    public void sendMessage(String text, ImageIcon image) {
+        Message message = new Message(currentUser, receiverList, text, image);
+        change.firePropertyChange("message", null, message);
     }
 
     public boolean addContact(int index) {
@@ -138,6 +168,7 @@ public class MessageClient {
         }
         return false;
     }
+
 
     public String[] getContactList() {
         ArrayList<User> contactList = contacts.getContactList();
@@ -198,14 +229,11 @@ public class MessageClient {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                MessageClient messageClient = new MessageClient();
 
-                JFrame frame = new JFrame("Client UI");
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.add(new ClientGui(new MessageClient()));
-                frame.pack();
-                frame.setVisible(true);
             }
         });
     }
-    
 }
+    
+

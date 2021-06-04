@@ -11,8 +11,8 @@ public class TestContacts {
     public static void main(String[] args) {
         Contacts contacts = new Contacts("files/contacts.dat");
 
-        contacts.addContact(new User("Guy", new ImageIcon("images/gubbe.jpg")));
-        contacts.addContact(new User("Man", new ImageIcon("images/gubbe.jpg")));
+        //contacts.addContact(new User("Guy", new ImageIcon("images/gubbe.jpg")));
+        //contacts.addContact(new User("Man", new ImageIcon("images/gubbe.jpg")));
 
         //contacts.removeContact(0);
 

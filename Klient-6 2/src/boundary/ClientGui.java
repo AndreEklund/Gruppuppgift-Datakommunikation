@@ -24,27 +24,32 @@ public class ClientGui extends JPanel {
     private JButton btnDisconnect = new JButton("Disconnect");
     private JButton btnRemove = new JButton("Remove");
     private JList receivers;
-    private JList messages;
+
+
     private JLabel imageLabel = new JLabel(" ", JLabel.CENTER);
+    private DefaultListModel messageListGUI = new DefaultListModel();
+    private JList<String> messages = new JList<>(messageListGUI);
     private ImageIcon image;
     private OnlineUsers onlinePanel;
     private ContactsPopup contactsPanel;
     //private String ip = "127.0.0.1";
-    private String ip = "172.20.10.6";
-    private int port = 434;
-
+    private String ip = "127.0.01";
+    private int port = 432;
 
     public ClientGui(MessageClient client) {
 
         this.client = client;
         setLayout(new BorderLayout());
         receivers = new JList();
-        messages = new JList();
         add(centerPanel(),BorderLayout.CENTER);
         add(messagePanel(),BorderLayout.WEST);
         add(receiverPanel(),BorderLayout.EAST);
 
         initListeners();
+
+    }
+
+    public ClientGui(){
 
     }
 
@@ -99,9 +104,18 @@ public class ClientGui extends JPanel {
 
     public void updateReceivers(ArrayList list){
         receivers.setListData(list.toArray());
-    }
 
-    public void updateMessages(String[] messages){
+    }
+    public void setMessageListGUI(ArrayList list){
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                for (int i=0; i<list.size(); i++){
+                    messageListGUI.addElement(list.get(i));
+                }
+            }
+        });
 
     }
 
@@ -184,6 +198,7 @@ public class ClientGui extends JPanel {
                     client.sendMessage(messageText.getText(), image);
                 }
             } else if(e.getSource()==btnOnlineUsers) {
+                client.fetchActiveUsers();
                 onlinePanel = new OnlineUsers(client, client.getOnlineList(), ClientGui.this);
             } else if(e.getSource()==btnContacts) {
                 contactsPanel = new ContactsPopup(client, client.getContactList(), ClientGui.this);

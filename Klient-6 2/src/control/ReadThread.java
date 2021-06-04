@@ -1,17 +1,20 @@
 package control;
 
+import boundary.ClientGui;
 import entity.Message;
 import entity.User;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class ReadThread extends Thread {
     private Socket socket;
     private MessageClient messageClient;
     private ObjectInputStream ois;
+    private ClientGui gui;
 
     public ReadThread(Socket socket, MessageClient messageClient) throws IOException {
         this.socket = socket;
@@ -26,21 +29,18 @@ public class ReadThread extends Thread {
         while (true) {
             try {
                 Object o = ois.readObject();
-                System.out.println(o.toString());
-                if (o instanceof User) {
-                     list.add((User) o);
-                     for (int i = 0; i < list.size(); i++) {
-                         System.out.println(list.get(i).toString());
-                     }
-                     messageClient.setOnlineList(list);
+                if (o instanceof ArrayList){
+                    list = (ArrayList) o;
+                    System.out.println(list.get(0).getUserName());
+                    messageClient.setOnlineList(list);
                 }
                else if (o instanceof Message) {
-                   message = (Message) ois.readObject();
-                   System.out.println(message.getText());
-                   messageClient.addMessage(message);
+                   message = (Message) o;
+                   message.setDateReceived(LocalDateTime.now());
+                   messageClient.setMessageListGUI(message);
                }
             } catch (IOException | ClassNotFoundException e) {
-                System.err.println(e);
+                messageClient.disconnect();
             }
 
         }

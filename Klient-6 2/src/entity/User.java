@@ -9,10 +9,6 @@ public class User implements Serializable {
     private ImageIcon image;
     private static final long serialVersionUID = 2525L;
 
-    public User(String username, ImageIcon image){
-        this.username = username;
-        this.image = image;
-    }
 
     public String getUserName() {
         return username;

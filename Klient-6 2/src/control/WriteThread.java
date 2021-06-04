@@ -14,11 +14,11 @@ public class WriteThread extends Thread implements PropertyChangeListener {
     private ObjectOutputStream oos;
     Message message;
 
-    public WriteThread(Socket socket, MessageClient messageClient) throws IOException {
+    public WriteThread(Socket socket, MessageClient messageClient, ObjectOutputStream oos) throws IOException {
         this.socket = socket;
         this.messageClient = messageClient;
         messageClient.addPropertyChangeListener(this);
-        oos = new ObjectOutputStream(socket.getOutputStream());
+        this.oos = oos;
     }
 
     @Override
@@ -47,4 +47,5 @@ public class WriteThread extends Thread implements PropertyChangeListener {
             notify();
         }
     }
+
 }

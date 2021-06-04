@@ -31,8 +31,11 @@ public class MessageViewer extends JPanel {
         f.add(textArea,BorderLayout.NORTH);
         f.add(lblIcon);
 
-
-        f.setSize(600, 400);
+        if(image.getIconWidth()>1920 || image.getIconHeight()>1080){
+            f.setSize(1024,793);
+        } else{
+            f.setSize(image.getIconWidth(), image.getIconHeight()+25);
+        }
         f.setLocationRelativeTo(null);
         f.setVisible(true);
     }
