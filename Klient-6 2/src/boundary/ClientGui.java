@@ -34,7 +34,7 @@ public class ClientGui extends JPanel {
     private ContactsPopup contactsPanel;
     //private String ip = "127.0.0.1";
     private String ip = "127.0.01";
-    private int port = 432;
+    private int port = 434;
 
     public ClientGui(MessageClient client) {
 
