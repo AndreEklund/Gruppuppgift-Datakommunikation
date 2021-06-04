@@ -191,9 +191,10 @@ public class ClientGui extends JPanel {
                 }
             } else if(e.getSource()==btnSend) {
                 if(image == null){
-                    client.sendMessage(messageText.getText(), null);
+                    ImageIcon imageIcon= new ImageIcon("files/IngenBild.jpg");
+                    client.sendMessage(messageText.getText(), imageIcon);
                 } else if (messageText.getText() == null){
-                    client.sendMessage(null, image);
+                    client.sendMessage("Ingen text i meddelandet", image);
                 } else{
                     client.sendMessage(messageText.getText(), image);
                 }
