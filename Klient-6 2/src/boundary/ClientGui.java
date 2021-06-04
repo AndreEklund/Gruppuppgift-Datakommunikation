@@ -34,7 +34,7 @@ public class ClientGui extends JPanel {
     private ContactsPopup contactsPanel;
     //private String ip = "127.0.0.1";
     private String ip = "127.0.01";
-    private int port = 432;
+    private int port = 434;
 
     public ClientGui(MessageClient client) {
 
@@ -191,7 +191,7 @@ public class ClientGui extends JPanel {
                 }
             } else if(e.getSource()==btnSend) {
                 if(image == null){
-                    ImageIcon imageIcon= new ImageIcon("files/IngenBild.jpg");
+                    ImageIcon imageIcon= new ImageIcon("images/IngenBild.jpg");
                     client.sendMessage(messageText.getText(), imageIcon);
                 } else if (messageText.getText() == null){
                     client.sendMessage("Ingen text i meddelandet", image);
