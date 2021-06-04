@@ -3,6 +3,8 @@ package boundary;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -11,7 +13,7 @@ import javax.swing.filechooser.FileFilter;
 
 import control.*;
 
-public class ClientGui extends JPanel {
+public class ClientGui extends JFrame {
     private MessageClient client;
     private JTextField messageText = new JTextField();
     private JTextField tfAge = new JTextField();
@@ -37,20 +39,23 @@ public class ClientGui extends JPanel {
     private int port = 432;
 
     public ClientGui(MessageClient client) {
+        setTitle("Client UI");
+        setLocation(200, 150);
+
+        setVisible(true);
+
 
         this.client = client;
-        setLayout(new BorderLayout());
+        JPanel panel = new JPanel(new BorderLayout());
         receivers = new JList();
-        add(centerPanel(),BorderLayout.CENTER);
-        add(messagePanel(),BorderLayout.WEST);
-        add(receiverPanel(),BorderLayout.EAST);
+        panel.add(centerPanel(),BorderLayout.CENTER);
+        panel.add(messagePanel(),BorderLayout.WEST);
+        panel.add(receiverPanel(),BorderLayout.EAST);
 
+        add(panel);
         initListeners();
 
-    }
-
-    public ClientGui(){
-
+        pack();
     }
 
     private JPanel messagePanel(){
@@ -162,6 +167,13 @@ public class ClientGui extends JPanel {
         btnOnlineUsers.addActionListener(listener);
         btnContacts.addActionListener(listener);
         btnRemove.addActionListener(listener);
+
+        addWindowListener(new WindowAdapter(){
+            public void windowClosing(WindowEvent e){
+                client.disconnect();
+                System.exit(0);
+            }
+        });
     }
 
 
