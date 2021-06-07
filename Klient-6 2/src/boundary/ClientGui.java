@@ -13,6 +13,9 @@ import javax.swing.filechooser.FileFilter;
 
 import control.*;
 
+/**
+ * Huvudfönster för GUI:t.
+ */
 public class ClientGui extends JFrame {
     private MessageClient client;
     private JTextField messageText = new JTextField();
@@ -27,7 +30,6 @@ public class ClientGui extends JFrame {
     private JButton btnRemove = new JButton("Remove");
     private JList receivers;
 
-
     private JLabel imageLabel = new JLabel(" ", JLabel.CENTER);
     private DefaultListModel messageListGUI = new DefaultListModel();
     private JList<String> messages = new JList<>(messageListGUI);
@@ -38,14 +40,26 @@ public class ClientGui extends JFrame {
     private String ip = "127.0.01";
     private int port = 434;
 
+    /**
+     * Konstruktor.
+     * Skapar alla paneler och lägger till listeners.
+     * @param client kontroller för klienten.
+     */
     public ClientGui(MessageClient client) {
         setTitle("Client UI");
         setLocation(200, 150);
-
         setVisible(true);
 
-
         this.client = client;
+
+        addPanels();
+        initListeners();
+    }
+
+    /**
+     * Lägger till panelerna.
+     */
+    private void addPanels() {
         JPanel panel = new JPanel(new BorderLayout());
         receivers = new JList();
         panel.add(centerPanel(),BorderLayout.CENTER);
@@ -53,36 +67,14 @@ public class ClientGui extends JFrame {
         panel.add(receiverPanel(),BorderLayout.EAST);
 
         add(panel);
-        initListeners();
 
         pack();
     }
 
-    private JPanel messagePanel(){
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Messages"));
-        panel.setPreferredSize(new Dimension(300,400));
-        panel.add(messages,BorderLayout.CENTER);
-        panel.add(btnView,BorderLayout.SOUTH);
-        return panel;
-    }
-
-    private JPanel receiverPanel(){
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Receivers"));
-        panel.setPreferredSize(new Dimension(300,400));
-        panel.add(receivers,BorderLayout.CENTER);
-        panel.add(eastButtons(),BorderLayout.SOUTH);
-        return panel;
-    }
-    private JPanel eastButtons(){
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add(btnContacts,BorderLayout.WEST);
-        panel.add(btnOnlineUsers,BorderLayout.CENTER);
-        panel.add(btnRemove,BorderLayout.EAST);
-        return panel;
-    }
-
+    /**
+     * Panelen i center.
+     * @return panelen.
+     */
     private JPanel centerPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(sendMessagePanel(),BorderLayout.NORTH);
@@ -91,7 +83,11 @@ public class ClientGui extends JFrame {
         return panel;
     }
 
-    private JPanel sendMessagePanel(){
+    /**
+     * Panelen med knapparna för meddelanden.
+     * @return panelen.
+     */
+    private JPanel sendMessagePanel() {
         JPanel panel = new JPanel(new GridLayout(5,1));
         panel.add(new JLabel("Text:"));
         panel.add(messageText);
@@ -100,35 +96,20 @@ public class ClientGui extends JFrame {
         return panel;
     }
 
-    private JPanel imagePanel(){
+    /**
+     * Panelen för bilden.
+     * @return panelen.
+     */
+    private JPanel imagePanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(imageLabel);
-
         return panel;
     }
 
-    public void updateReceivers(ArrayList list){
-        receivers.setListData(list.toArray());
-
-    }
-    public void setMessageListGUI(ArrayList list){
-
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                for (int i=0; i<list.size(); i++){
-                    messageListGUI.addElement(list.get(i));
-                }
-            }
-        });
-
-    }
-
-    public void setMessage(String text, ImageIcon icon){
-        MessageViewer viewer = new MessageViewer(text,icon);
-    }
-
-
+    /**
+     * Panelen med knapparna om anslutning.
+     * @return panelen.
+     */
     private JPanel connectPanel() {
         JPanel panel = new JPanel(new GridLayout(4,1));
         panel.add(btnConnect);
@@ -136,7 +117,81 @@ public class ClientGui extends JFrame {
         return panel;
     }
 
-    public boolean inputUserName(){
+    /**
+     * Panelen för meddelanden.
+     * @return panelen.
+     */
+    private JPanel messagePanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Messages"));
+        panel.setPreferredSize(new Dimension(300,400));
+        panel.add(messages,BorderLayout.CENTER);
+        panel.add(btnView,BorderLayout.SOUTH);
+        return panel;
+    }
+
+    /**
+     * Panelen för mottagare,
+     * @return panelen.
+     */
+    private JPanel receiverPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Receivers"));
+        panel.setPreferredSize(new Dimension(300,400));
+        panel.add(receivers,BorderLayout.CENTER);
+        panel.add(eastButtons(),BorderLayout.SOUTH);
+        return panel;
+    }
+
+    /**
+     * Panelen för knapparna för listorna.
+     * @return panelen.
+     */
+    private JPanel eastButtons() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(btnContacts,BorderLayout.WEST);
+        panel.add(btnOnlineUsers,BorderLayout.CENTER);
+        panel.add(btnRemove,BorderLayout.EAST);
+        return panel;
+    }
+
+    /**
+     * Uppdaterar listan för mottagare.
+     * @param list listan för mottagare.
+     */
+    public void updateReceivers(ArrayList list) {
+        receivers.setListData(list.toArray());
+    }
+
+    /**
+     * Sätter listan för meddelanden.
+     * @param list listan för meddelanden.
+     */
+    public void setMessageListGUI(ArrayList list) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                for (int i=0; i<list.size(); i++) {
+                    messageListGUI.addElement(list.get(i));
+                }
+            }
+        });
+    }
+
+    /**
+     * Visar ett meddelande.
+     * @param text texten att visa.
+     * @param icon bilden att visa.
+     */
+    public void setMessage(String text, ImageIcon icon){
+        MessageViewer viewer = new MessageViewer(text,icon);
+    }
+
+    /**
+     * Läser in användarens namn.
+     * @return true om det var ett giltigt namn, falskt annars.
+     */
+    public boolean inputUserName() {
         String name = JOptionPane.showInputDialog("Username: ");
         JFileChooser fc = new JFileChooser();
 
@@ -157,6 +212,9 @@ public class ClientGui extends JFrame {
         return false;
     }
 
+    /**
+     * Lägger till listeners till knapparna och fönstret.
+     */
     private void initListeners() {
         ActionListener listener = new ButtonListener();
         btnSend.addActionListener(listener);
@@ -176,7 +234,9 @@ public class ClientGui extends JFrame {
         });
     }
 
-
+    /**
+     * Hanterar vilken knapp som anropar vad.
+     */
     private class ButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             if(e.getSource()==btnConnect) {
@@ -202,12 +262,12 @@ public class ClientGui extends JFrame {
                     imageLabel.setIcon(temp);
                 }
             } else if(e.getSource()==btnSend) {
-                if(image == null){
+                if(image == null) {
                     ImageIcon imageIcon= new ImageIcon("images/IngenBild.jpg");
                     client.sendMessage(messageText.getText(), imageIcon);
-                } else if (messageText.getText() == null){
+                } else if (messageText.getText() == null) {
                     client.sendMessage("Ingen text i meddelandet", image);
-                } else{
+                } else {
                     client.sendMessage(messageText.getText(), image);
                 }
             } else if(e.getSource()==btnOnlineUsers) {
@@ -215,17 +275,20 @@ public class ClientGui extends JFrame {
                 onlinePanel = new OnlineUsers(client, client.getOnlineList(), ClientGui.this);
             } else if(e.getSource()==btnContacts) {
                 contactsPanel = new ContactsPopup(client, client.getContactList(), ClientGui.this);
-            } else if(e.getSource()==btnRemove){
+            } else if(e.getSource()==btnRemove) {
                 client.removeReceiver(receivers.getSelectedIndex());
                 updateReceivers(client.getReceiverList());
-            } else if(e.getSource()==btnView){
-                if(messages.getSelectedIndex()>=0){
+            } else if(e.getSource()==btnView) {
+                if(messages.getSelectedIndex()>=0) {
                     client.viewMessage(messages.getSelectedIndex());
                 }
             }
         }
     }
 
+    /**
+     * Gör så att man kan bara välja bilder i fileChooser.
+     */
     class ImageFilter extends FileFilter {
         public final static String JPEG = "jpeg";
         public final static String JPG = "jpg";

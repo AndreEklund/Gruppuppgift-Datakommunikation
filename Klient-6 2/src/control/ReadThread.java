@@ -10,22 +10,33 @@ import java.net.Socket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+/**
+ * Använder in ObjectInputStream för att läsa meddelanden från servern.
+ */
 public class ReadThread extends Thread {
-    private Socket socket;
     private MessageClient messageClient;
     private ObjectInputStream ois;
-    private ClientGui gui;
 
+    /**
+     * Konstruktor.
+     * @param socket socketen som används.
+     * @param messageClient kontrollern för klienten.
+     * @throws IOException om ett I/O error uppstår.
+     */
     public ReadThread(Socket socket, MessageClient messageClient) throws IOException {
-        this.socket = socket;
         this.messageClient = messageClient;
         ois = new ObjectInputStream(socket.getInputStream());
     }
 
+    /**
+     * Tråd som läser meddelanden ifrån servern.
+     * Om det är en lista av aktiva användare så uppdateras listan.
+     * Om det är ett meddelande, så läggs det till i meddelandelistan.
+     */
     @Override
     public void run() {
-        Message message= null;
-        ArrayList<User> list= new ArrayList<>();
+        Message message = null;
+        ArrayList<User> list = new ArrayList<>();
         while (true) {
             try {
                 Object o = ois.readObject();

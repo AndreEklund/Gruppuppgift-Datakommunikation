@@ -9,6 +9,9 @@ import java.util.Arrays;
 
 import control.MessageClient;
 
+/**
+ * Visar listan av aktiva användare.
+ */
 public class OnlineUsers extends JPanel {
     private MessageClient client;
     private JList<String> list;
@@ -17,6 +20,12 @@ public class OnlineUsers extends JPanel {
     private JButton btnAddToContacts = new JButton("Add to contacts");
     private ClientGui gui;
 
+    /**
+     * Konstruktor.
+     * @param client kontroller för klienten.
+     * @param str listan av aktiva användare.
+     * @param gui huvudfönstret.
+     */
     public OnlineUsers(MessageClient client, String[] str, ClientGui gui) {
         this.client = client;
         this.gui = gui;
@@ -65,22 +74,26 @@ public class OnlineUsers extends JPanel {
         initListeners();
     }
 
-    public void setGui(ClientGui gui){
-        this.gui = gui;
-    }
-
-
-
+    /**
+     * Returnerar vilket index som är valt.
+     * @return det valda index.
+     */
     public int getIndex() {
         return list.getSelectedIndex();
     }
 
+    /**
+     * Lägger till listeners.
+     */
     private void initListeners() {
         ActionListener listener = new ButtonListener();
         btnAddToReceivers.addActionListener(listener);
         btnAddToContacts.addActionListener(listener);
     }
 
+    /**
+     * Hanterar vilken knapp som anropar vad.
+     */
     class ButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == btnAddToReceivers) {
