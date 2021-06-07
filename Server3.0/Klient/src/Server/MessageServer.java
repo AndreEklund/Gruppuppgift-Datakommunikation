@@ -15,9 +15,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.logging.*;
 
+/**
+ * Serverklass med en inre klass som lagrar klienter i en map
+ */
 
 public class MessageServer extends Thread  {
-
 
     private Socket socket;
     private ServerSocket serverSocket;
@@ -30,9 +32,13 @@ public class MessageServer extends Thread  {
     private FileHandler trafficFile = new FileHandler("files/trafficLog.log");
     private LogReader logReader;
 
-
+    /**
+     * Konstruktor som instansierar objekten för socket,
+     * inre klassen och osända meddelanden
+     * @param port porten som socketen lyssnar på
+     * @throws IOException
+     */
     public MessageServer(int port) throws IOException {
-//        System.out.println("Server online!");
         initializeLogger();
         serverSocket = new ServerSocket(port);
         clients =new Clients();
@@ -40,8 +46,10 @@ public class MessageServer extends Thread  {
         start();
         logReader.start();
     }
-
-
+    /**
+     * run-metod som accepterar anslutningen
+     * och startar servern
+     */
     public void run()  {
         try {
             trafficLog.info("Server started");
@@ -50,18 +58,21 @@ public class MessageServer extends Thread  {
                 client = new Client(socket);
                 client.start();
             }
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-
-
-
+    /**
+     * metod som kopplar från anslutning
+     * vid exceptions
+     */
     private void disconnect(){
 
     }
-
+    /**
+     * Initierar loggen där all trafik och
+     * händelser lagras
+     */
     public void initializeLogger() {
         trafficLog.setUseParentHandlers(false);
         trafficFile.setFormatter(new SimpleFormatter() {
@@ -80,15 +91,25 @@ public class MessageServer extends Thread  {
         logReader = new LogReader("files/trafficLog.log");
     }
 
+    /**
+     * Inre klass som hanterar klientförfrågningar
+     */
     public class Client extends Thread implements Serializable {
+
         private Socket socket;
         private ObjectInputStream ois;
         private ObjectOutputStream oos;
 
-        public Client(Socket socket) throws IOException, ClassNotFoundException {
+        /**
+         * @param socket skickas med från huvudklassen vid instansiering
+         */
+        public Client(Socket socket){
             this.socket = socket;
         }
-
+        /**
+         * run-metod som körs sålänge servern är aktiv
+         * hämtar förfrågningar från klienter
+         */
         @Override
         public void run() {
             try {
@@ -96,28 +117,20 @@ public class MessageServer extends Thread  {
                 oos = new ObjectOutputStream(socket.getOutputStream());
                 while (true) {
 
-
                     Message message = (Message) ois.readObject();
                     recivers = message.getReceiverList();
-//                    System.out.println("Read object");
 
                     if (message.getText().equals("Connect")) {
                         connectedClient(message);
                     }
-
                     if (message.getText().equals("ActiveUsers")) {
                         activeUsers(oos);
                     }
-
                     if (message.getText().equals("Exit")) {
                         exitClient(message);
-
                     }
-
                     if (recivers != null) {
                         noReceivers(oos, message);
-//                        System.out.println("Message traffic");
-
                     }
                 }
             } catch (IOException | ClassNotFoundException e) {
@@ -125,7 +138,13 @@ public class MessageServer extends Thread  {
                 disconnect();
             }
         }
-
+        /**
+         * Körs när klient connectar till servern och lagrar denna
+         * ska hämta unsent messages vid lyckad uppkoppling
+         * @param message
+         * @throws IOException
+         * @throws ClassNotFoundException
+         */
         public void connectedClient(Message message) throws IOException, ClassNotFoundException {
             trafficLog.info("User " + message.getUser().getUserName() + " connected");
             clients.put(message.getUser(), this);
@@ -143,8 +162,15 @@ public class MessageServer extends Thread  {
                 unsendMessages.remove(message.getUser());
             }
         }
-        //class
-
+        /**
+         * Körs om recievers != null
+         * Metoden loopar igenom alla mottagare och klienter
+         * som är lagrade i mappen. Om mottagaren hittas så skickas meddelandet iväg,
+         * annars lagras det i unsent messages(avsändare & meddelande)
+         * @param oos
+         * @param message
+         * @throws IOException
+         */
         private void noReceivers(ObjectOutputStream oos, Message message) throws IOException {
             for (User user : recivers) {
                 for (User key : clients.clients.keySet()) {
@@ -163,50 +189,51 @@ public class MessageServer extends Thread  {
                 }
             }
         }
-
+        /**
+         * Stänger uppkopplingen om användaren kopplar ifrån och
+         * @param message
+         * @throws IOException
+         */
         private void exitClient(Message message) throws IOException {
             socket.close();
             clients.Remove(message.getUser());
             trafficLog.info("User " + message.getUser() + " has disconnected.");
         }
-
+        /**
+         * Låter användaren hämta listan med aktiva användare
+         * @param oos
+         * @throws IOException
+         * @throws ClassNotFoundException
+         */
         private void activeUsers(ObjectOutputStream oos) throws IOException, ClassNotFoundException {
 
             for (User key : clients.clients.keySet()) {
                 list.add(key);
             }
-
             oos.writeObject(list);
             trafficLog.info("Active users list sent.");
 
             list.clear();
         }
     }
-
+    /**
+     * Inre klass som lagrar klienter i en map
+     * med tillhörande metoder
+     */
     private class Clients implements Serializable {
         private  HashMap<User, Client> clients =new HashMap<>();
-        // egna tillägg
+
         public synchronized void put(User user,Client client) {
             clients.put(user, client);
         }
         public synchronized Client get(User user) {
             return clients.get(user);
         }
-
-
-
         public synchronized void Remove(User user){
             clients.remove(user);
         }
-
         public HashMap<User, Client> getClients() {
             return clients;
         }
-        // fler synchronized-metoder som behövs
-    }//Class
-
-
-
-
-
-}//Class
+    }
+}
