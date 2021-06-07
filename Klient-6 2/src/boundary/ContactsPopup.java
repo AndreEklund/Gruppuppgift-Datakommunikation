@@ -10,6 +10,9 @@ import java.util.ArrayList;
 
 import control.MessageClient;
 
+/**
+ * Visar listan av kontakter.
+ */
 public class ContactsPopup extends JPanel {
     private MessageClient client;
     private JList<String> list;
@@ -17,6 +20,12 @@ public class ContactsPopup extends JPanel {
     private JButton btnAdd;
     private ClientGui gui;
 
+    /**
+     * Konstruktor.
+     * @param client kontroller för klienten.
+     * @param str listan av kontakter.
+     * @param gui huvudfönstret.
+     */
     public ContactsPopup(MessageClient client, String[] str, ClientGui gui) {
         this.client = client;
         this.gui = gui;
@@ -63,16 +72,26 @@ public class ContactsPopup extends JPanel {
         initListeners();
     }
 
+    /**
+     * Returnerar vilket index som är valt.
+     * @return det valda index.
+     */
     public int getIndex() {
         System.out.println(list.getSelectedIndex());
         return list.getSelectedIndex();
     }
 
+    /**
+     * Lägger till listeners.
+     */
     private void initListeners() {
         ActionListener listener = new ButtonListeners();
         btnAdd.addActionListener(listener);
     }
 
+    /**
+     * Hanterar vilken knapp som anropar vad.
+     */
     class ButtonListeners implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == btnAdd) {

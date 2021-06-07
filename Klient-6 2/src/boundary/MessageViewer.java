@@ -3,7 +3,15 @@ package boundary;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Visar meddelandet.
+ */
 public class MessageViewer extends JPanel {
+    /**
+     * Konstruktor.
+     * @param text texten att visa.
+     * @param image bilden att visa.
+     */
     public MessageViewer(String text, ImageIcon image) {
         JFrame f = new JFrame();
         JPanel p = new JPanel(new BorderLayout());

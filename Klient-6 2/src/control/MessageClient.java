@@ -12,8 +12,10 @@ import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
 
+/**
+ * Controller klass för klienten.
+ */
 public class MessageClient {
-    //private Ui ui;
     private Contacts contacts;
     private User currentUser;
     private ArrayList<Message> messageList;
@@ -25,9 +27,12 @@ public class MessageClient {
 
     private final PropertyChangeSupport change = new PropertyChangeSupport(this);
 
+    /**
+     * Konstruktor för klienten.
+     */
     public MessageClient() {
         contacts = new Contacts("files/contacts.dat");
-        messageList = new ArrayList<Message>();
+        messageList = new ArrayList<>();
         onlineList = new ArrayList<>();
         receiverList = new ArrayList<>();
         currentUser = new User();
@@ -35,6 +40,10 @@ public class MessageClient {
         gui = new ClientGui(this);
     }
 
+    /**
+     * Hämtar meddelandet från det angivna index och visar det i GUI:t.
+     * @param index positionen av meddelandet i listan.
+     */
     public void viewMessage(int index) {
         if (index >= 0 && index < messageList.size()) {
             Message message = messageList.get(index);
@@ -42,53 +51,50 @@ public class MessageClient {
         }
     }
 
-    /*public void viewMessage(int index) {
-        if (index >= 0 && index < messageList.size()) {
-            Message message = messageList.get(index);
-            gui.setMessage(message.getText(), message.getIcon());
-        }
-    }*/
-
+    /**
+     * Sätter listan av online användare.
+     * @param onlineList listan av online användare.
+     */
     public void setOnlineList(ArrayList<User> onlineList) {
         this.onlineList = onlineList;
         System.out.println("onlinelist set");
     }
 
-    public User getCurrentUser() {
-        return currentUser;
-    }
-
-    public void setCurrentUser(User currentUser) {
-        if (currentUser != null) {
-            this.currentUser = currentUser;
-        }
-    }
-
+    /**
+     * Sätter användarnamnet på användaren.
+     * @param userName användarnamnet.
+     */
     public void setUserName(String userName){
         currentUser.setUsername(userName);
     }
 
+    /**
+     * Sätter profilbilden på användaren.
+     * @param imageIcon profilbilden.
+     */
     public void setImage(ImageIcon imageIcon){
         currentUser.setImage(imageIcon);
     }
 
+    /**
+     * Ansluter till servern. Startar trådarna som skriver till och läser meddelanden från servern.
+     * @param ip ip-adressen att ansluta till.
+     * @param port porten att ansluta till.
+     */
     public void connect(String ip, int port) {
         try {
             socket = new Socket(ip, port);
-            oos = new ObjectOutputStream(socket.getOutputStream());
-            oos.writeObject(new Message(currentUser,null,"Connect",currentUser.getImage()));
-            oos.writeObject(new Message(currentUser,null,"ActiveUsers",currentUser.getImage()));
+
             new ReadThread(socket, this).start();
-            new WriteThread(socket, this, oos). start();
+            new WriteThread(socket, this).start();
         } catch (IOException e) {
             System.err.println(e);
         }
     }
 
-    public ArrayList<Message> getMessageList() {
-        return messageList;
-    }
-
+    /**
+     * Bryter anslutningen till servern. Skriver kontaktlistan till en fil på hårddisken.
+     */
     public void disconnect() {
         try {
             if (socket != null && socket.isConnected()) {
@@ -101,10 +107,18 @@ public class MessageClient {
         }
     }
 
-    //public void addMessage(Message message) {
-      //  messageList.add(message);
-        //updateMessageList();
-    //}
+    /**
+     * Returnerar användaren.
+     * @return användaren.
+     */
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    /**
+     * Lägger till ett meddelande till listan och skickar listan till GUI:t.
+     * @param message det nya meddelandet.
+     */
     public void setMessageListGUI(Message message){
         messageList.add(message);
         ArrayList<String> strMessageList = new ArrayList<>();
@@ -114,27 +128,18 @@ public class MessageClient {
         gui.setMessageListGUI(strMessageList);
     }
 
-    public void updateMessageList() {
-        ArrayList<Message> strMessageList = new ArrayList<>();
-        Message message;
-        for (int i = 0; i < messageList.size(); i++) {
-            //message = messageList.get(i);
-            //strMessageList.add(message);
-        }
-       // gui.updateMessages(strMessageList);
-    }
-
-    public void updateOnlineList(ArrayList list) {
-        // behöver vet hur message subklassen ser ut
-        // skicka till GUI:t
-
-
-    }
+    /**
+     * Skriver till servern att skicka listan av aktiva användare.
+     */
     public void fetchActiveUsers(){
         Message message = new Message(currentUser,null,"ActiveUsers",new ImageIcon());
         change.firePropertyChange("message",null,message);
     }
 
+    /**
+     * Returnerar listan av online användare.
+     * @return listan av online användare.
+     */
     public String[] getOnlineList() {
         String[] strOnlineList = new String[onlineList.size()];
         for (int i = 0; i < onlineList.size(); i++) {
@@ -145,11 +150,21 @@ public class MessageClient {
         return strOnlineList;
     }
 
+    /**
+     * Skickar ett meddelande till servern.
+     * @param text Texten i meddelandet.
+     * @param image Bilden i meddelandet.
+     */
     public void sendMessage(String text, ImageIcon image) {
         Message message = new Message(currentUser, receiverList, text, image);
         change.firePropertyChange("message", null, message);
     }
 
+    /**
+     * Lägger till den valda användaren till kontaktlistan.
+     * @param index användarens position i onlinelistan.
+     * @return true om det gick att lägga till användaren, falskt annars.
+     */
     public boolean addContact(int index) {
         if (index >= 0 && index < onlineList.size()) {
             if (contacts.addContact(onlineList.get(index))) {
@@ -159,6 +174,11 @@ public class MessageClient {
         return false;
     }
 
+    /**
+     * Tar bort en kontakt ur listan.
+     * @param index kontaktens position i listan.
+     * @return true om det gick att ta bort användaren, falskt annars.
+     */
     public boolean removeContact(int index) {
         if (contacts.removeContact(index)) {
             return true;
@@ -166,7 +186,10 @@ public class MessageClient {
         return false;
     }
 
-
+    /**
+     * Returnerar kontaktlistan.
+     * @return kontaktlistan.
+     */
     public String[] getContactList() {
         ArrayList<User> contactList = contacts.getContactList();
         String[] strContactList = new String[contactList.size()];
@@ -176,19 +199,21 @@ public class MessageClient {
         return strContactList;
     }
 
+    /**
+     * Lägger till en användare till mottagarlistan.
+     * @param index positionen att hämta mottagaren från
+     * @param list vilken lista att hämta mottagaren från. 0 från kontaktlistan, 1 från online listan
+     * @return true om det gick att lägga till mottagaren, falskt annars.
+     */
     public boolean addReceiver(int index, int list) {
-        // kan kanske göras på ett bättre sätt
-        // list == 0 från kontakt listan, list == 1 från uppkopplade listan
         User newReceiver;
 
-        if (list == 0) {
+        if (list == 0) { // från kontaktlistan
             newReceiver = contacts.getContactAt(index);
-        } else if (list == 1 ) {
-           //hakvar newReceiver = onlineList.get(index);
+        } else if (list == 1 ) { // från online listan
             newReceiver = onlineList.get(index);
             System.out.println("44");
             System.out.println(newReceiver.getUserName());
-
         } else {
             return false;
         }
@@ -203,6 +228,11 @@ public class MessageClient {
         return true;
     }
 
+    /**
+     * Tar bort en mottagare ur listan.
+     * @param index mottagarens position i listan.
+     * @return true om det gick att ta bort mottagaren, falskt annars.
+     */
     public boolean removeReceiver(int index) {
         if (index >= 0 && index < receiverList.size()) {
             receiverList.remove(index);
@@ -211,6 +241,10 @@ public class MessageClient {
         return false;
     }
 
+    /**
+     * Returnerar mottagarlistan.
+     * @return mottagarlistan.
+     */
     public ArrayList<String> getReceiverList() {
         ArrayList<String> strReceiverList = new ArrayList<>();
         for (User receiver : receiverList) {
@@ -219,10 +253,17 @@ public class MessageClient {
         return strReceiverList;
     }
 
+    /**
+     * Lägger till en listener för propertyChange.
+     * @param listener listener att lägga till.
+     */
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         change.addPropertyChangeListener(listener);
     }
 
+    /**
+     * Startar applikationen.
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
