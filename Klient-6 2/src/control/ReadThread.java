@@ -1,7 +1,7 @@
 package control;
 
-import boundary.ClientGui;
 import entity.Message;
+import entity.OnlineListMessage;
 import entity.User;
 
 import java.io.IOException;
@@ -35,21 +35,24 @@ public class ReadThread extends Thread {
      */
     @Override
     public void run() {
-        Message message = null;
-        ArrayList<User> list = new ArrayList<>();
+        Message message;
+        ArrayList<User> list;
         while (true) {
             try {
                 Object o = ois.readObject();
-                if (o instanceof ArrayList){
-                    list = (ArrayList) o;
-                    System.out.println(list.get(0).getUserName());
-                    messageClient.setOnlineList(list);
+                if (o instanceof Message) {
+                    message = (Message) o;
+                    if (message instanceof OnlineListMessage){
+                        list = ((OnlineListMessage) message).getOnlineList();
+                        System.out.println(list.get(0).getUserName());
+                        messageClient.setOnlineList(list);
+                    }
+                    else {
+                        message.setDateReceived(LocalDateTime.now());
+                        messageClient.setMessageListGUI(message);
+                    }
                 }
-               else if (o instanceof Message) {
-                   message = (Message) o;
-                   message.setDateReceived(LocalDateTime.now());
-                   messageClient.setMessageListGUI(message);
-               }
+
             } catch (IOException | ClassNotFoundException e) {
                 messageClient.disconnect();
             }
