@@ -9,16 +9,26 @@ import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+/**
+ * Klass som loggar all trafik och händelser
+ */
 public class LogReader extends Thread {
     private String filename;
     private ServerUI ui;
     private ArrayList<String> logList;
 
+    /**
+     * @param filename loggfil som servern skriver till
+     */
     public LogReader(String filename) {
         this.filename = filename;
         ui = new ServerUI();
     }
 
+    /**
+     * run-metod som tillåter att kontrollera loghistorik
+     * i konsolen givet ett visst intervall
+     */
     @Override
     public void run() {
         LocalDateTime date1;
@@ -48,6 +58,12 @@ public class LogReader extends Thread {
         }
     }
 
+    /**
+     * metoden som körs i run metoden med de två
+     * datumen som utgör intervallet som parametrar
+     * @param date1 första datumet
+     * @param date2 andra datumet
+     */
     public void readLogFile(LocalDateTime date1, LocalDateTime date2) {
         try{
             FileInputStream fis = new FileInputStream(filename);
@@ -73,14 +89,33 @@ public class LogReader extends Thread {
         }
     }
 
+    /**
+     * returnerar en boolean och kollar
+     * om loggen är inom det angivna intervallet
+     * @param date1
+     * @param dateLog
+     * @return
+     */
     public boolean dateLogIsWithin(LocalDateTime date1, LocalDateTime dateLog) {
         return dateLog.isEqual(date1) || dateLog.isAfter(date1);
     }
 
+    /**
+     * -||- - efter det angivna intervallet
+     * @param date2
+     * @param dateLog
+     * @return
+     */
     public boolean dateLogIsAfter(LocalDateTime date2, LocalDateTime dateLog) {
         return dateLog.isAfter(date2);
     }
 
+    /**
+     * läser det angivna datumet och returner ett
+     * localdatetime objekt
+     * @param dateTimeText
+     * @return
+     */
     public LocalDateTime readDateEntered(String dateTimeText) {
         LocalDateTime date = null;
         int[] intArray = strToIntArrayEntered(dateTimeText);
