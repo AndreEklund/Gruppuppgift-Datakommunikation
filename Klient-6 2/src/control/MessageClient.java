@@ -23,7 +23,6 @@ public class MessageClient {
     private ArrayList<User> receiverList;
     private Socket socket;
     private ClientGui gui;
-    private ObjectOutputStream oos;
 
     private final PropertyChangeSupport change = new PropertyChangeSupport(this);
 
@@ -84,7 +83,6 @@ public class MessageClient {
     public void connect(String ip, int port) {
         try {
             socket = new Socket(ip, port);
-
             new ReadThread(socket, this).start();
             new WriteThread(socket, this).start();
         } catch (IOException e) {
@@ -98,7 +96,7 @@ public class MessageClient {
     public void disconnect() {
         try {
             if (socket != null && socket.isConnected()) {
-                oos.writeObject(new Message(currentUser, null, "Exit", null));
+                //oos.writeObject(new Message(currentUser, null, "Exit", null));
                 socket.close();
                 contacts.writeToFile();
             }
@@ -170,18 +168,6 @@ public class MessageClient {
             if (contacts.addContact(onlineList.get(index))) {
                 return true;
             }
-        }
-        return false;
-    }
-
-    /**
-     * Tar bort en kontakt ur listan.
-     * @param index kontaktens position i listan.
-     * @return true om det gick att ta bort användaren, falskt annars.
-     */
-    public boolean removeContact(int index) {
-        if (contacts.removeContact(index)) {
-            return true;
         }
         return false;
     }
