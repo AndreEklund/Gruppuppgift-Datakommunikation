@@ -1,7 +1,6 @@
 package Server;
 
-import entity.Message;
-import entity.User;
+import entity.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -210,7 +209,7 @@ public class MessageServer extends Thread  {
             for (User key : clients.clients.keySet()) {
                 list.add(key);
             }
-            oos.writeObject(list);
+            oos.writeObject(new OnlineListMessage(list));
             trafficLog.info("Active users list sent.");
 
             list.clear();
