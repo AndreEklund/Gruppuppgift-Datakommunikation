@@ -4,6 +4,8 @@ import boundary.ClientGui;
 import entity.*;
 
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.net.*;
@@ -30,16 +32,9 @@ public class MessageClient {
         receiverList = new ArrayList<>();
         currentUser = new User();
 
-        JFrame frame = new JFrame("Client UI");
-        frame.setLocation(200, 150);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gui = new ClientGui(this);
-        frame.add(gui);
-        frame.pack();
-        frame.setVisible(true);
-
-
     }
+
     public void viewMessage(int index) {
         if (index >= 0 && index < messageList.size()) {
             Message message = messageList.get(index);
@@ -96,9 +91,11 @@ public class MessageClient {
 
     public void disconnect() {
         try {
-            oos.writeObject(new Message(currentUser,null,"Exit",null));
-            socket.close();
-            contacts.writeToFile();
+            if (socket != null && socket.isConnected()) {
+                oos.writeObject(new Message(currentUser, null, "Exit", null));
+                socket.close();
+                contacts.writeToFile();
+            }
         } catch (IOException e) {
             //System.err.println(e);
         }
