@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 /**
- * Klass som loggar all trafik och händelser
+ * Klass som loggar all trafik och händelser.
  */
 public class LogReader extends Thread {
     private String filename;
@@ -18,7 +18,8 @@ public class LogReader extends Thread {
     private ArrayList<String> logList;
 
     /**
-     * @param filename loggfil som servern skriver till
+     * Konstruktor.
+     * @param filename loggfil som servern skriver till.
      */
     public LogReader(String filename) {
         this.filename = filename;
@@ -26,8 +27,7 @@ public class LogReader extends Thread {
     }
 
     /**
-     * run-metod som tillåter att kontrollera loghistorik
-     * i konsolen givet ett visst intervall
+     * Run-metod som tillåter att kontrollera loghistorik i konsolen givet ett visst intervall.
      */
     @Override
     public void run() {
@@ -59,8 +59,7 @@ public class LogReader extends Thread {
     }
 
     /**
-     * metoden som körs i run metoden med de två
-     * datumen som utgör intervallet som parametrar
+     * Metoden som körs i run metoden med de två datumen som utgör intervallet som parametrar
      * @param date1 första datumet
      * @param date2 andra datumet
      */
@@ -90,31 +89,29 @@ public class LogReader extends Thread {
     }
 
     /**
-     * returnerar en boolean och kollar
-     * om loggen är inom det angivna intervallet
-     * @param date1
-     * @param dateLog
-     * @return
+     * Returnerar en boolean och kollar om loggen är inom det angivna intervallet.
+     * @param date1 första datumet.
+     * @param dateLog datumet för loggen.
+     * @return true om datumet är innom det givna intervallet.
      */
     public boolean dateLogIsWithin(LocalDateTime date1, LocalDateTime dateLog) {
         return dateLog.isEqual(date1) || dateLog.isAfter(date1);
     }
 
     /**
-     * -||- - efter det angivna intervallet
-     * @param date2
-     * @param dateLog
-     * @return
+     * Returnerar en boolean och kollar om loggen är efter angivna intervallet
+     * @param date2 det andra datumet
+     * @param dateLog datumet för loggen.
+     * @return true om datumet är efter det givna intervallet.
      */
     public boolean dateLogIsAfter(LocalDateTime date2, LocalDateTime dateLog) {
         return dateLog.isAfter(date2);
     }
 
     /**
-     * läser det angivna datumet och returner ett
-     * localdatetime objekt
-     * @param dateTimeText
-     * @return
+     * Läser det angivna datumet och returner ett LocalDateTime objekt
+     * @param dateTimeText datumet som en sträng.
+     * @return datumet som ett LocalDateTime objekt.
      */
     public LocalDateTime readDateEntered(String dateTimeText) {
         LocalDateTime date = null;
@@ -127,7 +124,12 @@ public class LogReader extends Thread {
         return date;
     }
 
-    public int[] strToIntArrayEntered(String dateTimeText) {
+    /**
+     * Ändrar datumet av den angivna strängen till en int array.
+     * @param dateTimeText datumet som en sträng.
+     * @return talen i datumet some en int array.
+     */
+    private int[] strToIntArrayEntered(String dateTimeText) {
         int[] intArray = null;
         try {
             intArray = new int[6];
@@ -142,6 +144,12 @@ public class LogReader extends Thread {
         return intArray;
     }
 
+    /**
+     * Läser datumet i loggen.
+     * @param dateText datumet i loggen som en sträng.
+     * @param timeText tiden i loggen som en sträng.
+     * @return datumet som en LocalDateTime objekt.
+     */
     public LocalDateTime readDateLog(String dateText, String timeText) {
         LocalDateTime date = null;
         int[] intArray = strToIntArrayLog(dateText, timeText);
@@ -153,7 +161,13 @@ public class LogReader extends Thread {
         return date;
     }
 
-    public int[] strToIntArrayLog(String dateText, String timeText) {
+    /**
+     * Ändrar datum strängen i loggen till en int array.
+     * @param dateText datumet i loggen som en sträng.
+     * @param timeText tiden i loggen som en sträng.
+     * @return talen i datumet some en int array.
+     */
+    private int[] strToIntArrayLog(String dateText, String timeText) {
         int[] intArray = new int[6];
         try {
             String[] dateParts = dateText.split("-");
