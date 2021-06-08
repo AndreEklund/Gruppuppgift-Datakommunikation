@@ -270,7 +270,7 @@ public class ClientGui extends JFrame {
                     client.sendMessage(messageText.getText(), image);
                 }
             } else if(e.getSource()==btnOnlineUsers) {
-                client.fetchActiveUsers();
+//                client.fetchActiveUsers();
                 onlinePanel = new OnlineUsers(client, client.getOnlineList(), ClientGui.this);
             } else if(e.getSource()==btnContacts) {
                 contactsPanel = new ContactsPopup(client, client.getContactList(), ClientGui.this);

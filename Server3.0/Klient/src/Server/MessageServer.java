@@ -11,7 +11,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.logging.*;
 
 /**
@@ -102,6 +101,10 @@ public class MessageServer extends Thread  {
             this.socket = socket;
         }
 
+        public ObjectOutputStream getOos() {
+            return oos;
+        }
+
         /**
          * run-metod som körs sålänge servern är aktiv
          * hämtar förfrågningar från klienter
@@ -112,23 +115,21 @@ public class MessageServer extends Thread  {
                 ois = new ObjectInputStream(socket.getInputStream());
                 oos = new ObjectOutputStream(socket.getOutputStream());
                 while (true) {
-
                     Message message = (Message) ois.readObject();
                     recivers = message.getReceiverList();
 
-                    if (message.getText().equals("Connect")) {
+                    if (message.getText().equals("Connect") && recivers == null) {
                         connectedClient(message);
-                    }
-                    if (message.getText().equals("ActiveUsers")) {
-                        activeUsers(oos);
+                        activeUsers();
                     }
                     if (recivers != null) {
-                        noReceivers(oos, message);
+                        noReceivers(message);
                     }
                 }
             } catch (IOException e) {
                 try {
                     exitClient();
+                    activeUsers();
                 } catch (IOException e2) {
                     e2.printStackTrace();
                 }
@@ -168,24 +169,24 @@ public class MessageServer extends Thread  {
          * Metoden loopar igenom alla mottagare och klienter
          * som är lagrade i mappen. Om mottagaren hittas så skickas meddelandet iväg,
          * annars lagras det i unsent messages(avsändare & meddelande)
-         * @param oos
          * @param message
          * @throws IOException
          */
-        private void noReceivers(ObjectOutputStream oos, Message message) throws IOException {
-            for (User user : recivers) {
+        private void noReceivers(Message message) throws IOException {
+            ObjectOutputStream oosReceiver;
+            for (User receiver : recivers) {
                 for (User key : clients.clients.keySet()) {
-                    if (user.equals(key)) {
-                        oos = clients.get(user).oos;
-                        oos.writeObject(message);
+                    if (receiver.equals(key)) {
+                        oosReceiver = clients.get(receiver).getOos();
+                        oosReceiver.writeObject(message);
 
-                        oos.flush();
+                        oosReceiver.flush();
                         trafficLog.info("Message from " + message.getUser().getUserName() +
-                                " sent to " + user.getUserName());
+                                " sent to " + receiver.getUserName());
                     } else {
-                        unsendMessages.put(user, message);
+                        unsendMessages.put(receiver, message);
                         trafficLog.info("Message from " + message.getUser().getUserName() +
-                                " added to unsent list for " + user.getUserName());
+                                " added to unsent list for " + receiver.getUserName());
                     }
                 }
             }
@@ -200,7 +201,7 @@ public class MessageServer extends Thread  {
                 socket.close();
             }
             if (user != null) {
-                clients.Remove(user);
+                clients.remove(user);
                 trafficLog.info("User " + user.getUserName() + " has disconnected.");
             } else {
                 trafficLog.info("Connection failed.");
@@ -209,16 +210,18 @@ public class MessageServer extends Thread  {
 
         /**
          * Låter användaren hämta listan med aktiva användare
-         * @param oos
          * @throws IOException
-         * @throws ClassNotFoundException
          */
-        private void activeUsers(ObjectOutputStream oos) throws IOException, ClassNotFoundException {
-
-            for (User key : clients.clients.keySet()) {
-                list.add(key);
+        private void activeUsers() throws IOException {
+            ObjectOutputStream oosReceiver;
+            list.addAll(clients.clients.keySet());
+            OnlineListMessage listMessage = new OnlineListMessage(list);
+            for (User receiver : clients.clients.keySet()) {
+                oosReceiver = clients.get(receiver).getOos();
+                oosReceiver.writeObject(listMessage);
+                oosReceiver.flush();
             }
-            oos.writeObject(new OnlineListMessage(list));
+
             trafficLog.info("Active users list sent.");
 
             list.clear();
@@ -238,7 +241,7 @@ public class MessageServer extends Thread  {
         public synchronized Client get(User user) {
             return clients.get(user);
         }
-        public synchronized void Remove(User user){
+        public synchronized void remove(User user){
             clients.remove(user);
         }
         public HashMap<User, Client> getClients() {

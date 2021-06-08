@@ -44,7 +44,7 @@ public class ReadThread extends Thread {
                     message = (Message) o;
                     if (message instanceof OnlineListMessage){
                         list = ((OnlineListMessage) message).getOnlineList();
-                        System.out.println(list.get(0).getUserName());
+                        System.out.println("Online list get");
                         messageClient.setOnlineList(list);
                     }
                     else {

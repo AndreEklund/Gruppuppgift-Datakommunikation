@@ -38,8 +38,6 @@ public class WriteThread extends Thread implements PropertyChangeListener {
         try {
             oos.writeObject(new Message(messageClient.getCurrentUser(),null,"Connect",
                     messageClient.getCurrentUser().getImage()));
-            oos.writeObject(new Message(messageClient.getCurrentUser(),null,"ActiveUsers",
-                    messageClient.getCurrentUser().getImage()));
             while (true) {
                 try {
                     wait();
