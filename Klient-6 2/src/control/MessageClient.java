@@ -56,6 +56,7 @@ public class MessageClient {
      */
     public void setOnlineList(ArrayList<User> onlineList) {
         this.onlineList = onlineList;
+        onlineList.remove(currentUser);
         System.out.println("onlinelist set");
     }
 
@@ -96,12 +97,14 @@ public class MessageClient {
     public void disconnect() {
         try {
             if (socket != null && socket.isConnected()) {
-                //oos.writeObject(new Message(currentUser, null, "Exit", null));
                 socket.close();
+                onlineList.clear();
+                receiverList.clear();
+                gui.updateReceivers(receiverList);
                 contacts.writeToFile();
             }
         } catch (IOException e) {
-            //System.err.println(e);
+            e.printStackTrace();
         }
     }
 
@@ -124,14 +127,6 @@ public class MessageClient {
             strMessageList.add(messageList.get(i).getUser().getUserName() + " " + messageList.get(i).getDateReceived().toString());
         }
         gui.setMessageListGUI(strMessageList);
-    }
-
-    /**
-     * Skriver till servern att skicka listan av aktiva användare.
-     */
-    public void fetchActiveUsers(){
-        Message message = new Message(currentUser,null,"ActiveUsers",new ImageIcon());
-        change.firePropertyChange("message",null,message);
     }
 
     /**
