@@ -1,4 +1,4 @@
-package Server;
+package control;
 
 import entity.*;
 
@@ -247,5 +247,9 @@ public class MessageServer extends Thread  {
         public HashMap<User, Client> getClients() {
             return clients;
         }
+    }
+
+    public static void main(String[] args) throws IOException {
+        MessageServer messageServer= new MessageServer(434);
     }
 }
