@@ -45,6 +45,7 @@ public class MessageServer extends Thread  {
         start();
         logReader.start();
     }
+
     /**
      * run-metod som accepterar anslutningen
      * och startar servern
@@ -61,13 +62,7 @@ public class MessageServer extends Thread  {
             e.printStackTrace();
         }
     }
-    /**
-     * metod som kopplar från anslutning
-     * vid exceptions
-     */
-    private void disconnect(){
 
-    }
     /**
      * Initierar loggen där all trafik och
      * händelser lagras
@@ -98,6 +93,7 @@ public class MessageServer extends Thread  {
         private Socket socket;
         private ObjectInputStream ois;
         private ObjectOutputStream oos;
+        private User user;
 
         /**
          * @param socket skickas med från huvudklassen vid instansiering
@@ -105,6 +101,7 @@ public class MessageServer extends Thread  {
         public Client(Socket socket){
             this.socket = socket;
         }
+
         /**
          * run-metod som körs sålänge servern är aktiv
          * hämtar förfrågningar från klienter
@@ -125,18 +122,21 @@ public class MessageServer extends Thread  {
                     if (message.getText().equals("ActiveUsers")) {
                         activeUsers(oos);
                     }
-                    if (message.getText().equals("Exit")) {
-                        exitClient(message);
-                    }
                     if (recivers != null) {
                         noReceivers(oos, message);
                     }
                 }
-            } catch (IOException | ClassNotFoundException e) {
+            } catch (IOException e) {
+                try {
+                    exitClient();
+                } catch (IOException e2) {
+                    e2.printStackTrace();
+                }
+            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
-                disconnect();
             }
         }
+
         /**
          * Körs när klient connectar till servern och lagrar denna
          * ska hämta unsent messages vid lyckad uppkoppling
@@ -145,22 +145,24 @@ public class MessageServer extends Thread  {
          * @throws ClassNotFoundException
          */
         public void connectedClient(Message message) throws IOException, ClassNotFoundException {
-            trafficLog.info("User " + message.getUser().getUserName() + " connected");
-            clients.put(message.getUser(), this);
+            user = message.getUser();
+            trafficLog.info("User " + user.getUserName() + " connected");
+            clients.put(user, this);
 
             ArrayList<Message> pendingMessages = unsendMessages.getArrayList(message.getUser());
             if (pendingMessages != null) {
                 for (Message m : pendingMessages) {
-                    trafficLog.info("Sending unsent messages to " + message.getUser().getUserName());
-                    oos = clients.get(message.getUser()).oos;
+                    trafficLog.info("Sending unsent messages to " + user.getUserName());
+                    oos = clients.get(user).oos;
                     oos.writeObject(m);
                     oos.flush();
                     trafficLog.info("Message from " + m.getUser().getUserName() +
-                            " sent to " + message.getUser().getUserName());
+                            " sent to " + user.getUserName());
                 }
-                unsendMessages.remove(message.getUser());
+                unsendMessages.remove(user);
             }
         }
+
         /**
          * Körs om recievers != null
          * Metoden loopar igenom alla mottagare och klienter
@@ -188,16 +190,23 @@ public class MessageServer extends Thread  {
                 }
             }
         }
+
         /**
          * Stänger uppkopplingen om användaren kopplar ifrån och
-         * @param message
          * @throws IOException
          */
-        private void exitClient(Message message) throws IOException {
-            socket.close();
-            clients.Remove(message.getUser());
-            trafficLog.info("User " + message.getUser() + " has disconnected.");
+        private void exitClient() throws IOException {
+            if (!socket.isClosed()) {
+                socket.close();
+            }
+            if (user != null) {
+                clients.Remove(user);
+                trafficLog.info("User " + user.getUserName() + " has disconnected.");
+            } else {
+                trafficLog.info("Connection failed.");
+            }
         }
+
         /**
          * Låter användaren hämta listan med aktiva användare
          * @param oos
@@ -215,6 +224,7 @@ public class MessageServer extends Thread  {
             list.clear();
         }
     }
+
     /**
      * Inre klass som lagrar klienter i en map
      * med tillhörande metoder

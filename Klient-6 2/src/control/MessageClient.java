@@ -83,8 +83,8 @@ public class MessageClient {
     public void connect(String ip, int port) {
         try {
             socket = new Socket(ip, port);
-            new ReadThread(socket, this).start();
             new WriteThread(socket, this).start();
+            new ReadThread(socket, this).start();
         } catch (IOException e) {
             System.err.println(e);
         }
