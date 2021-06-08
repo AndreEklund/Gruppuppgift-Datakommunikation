@@ -248,4 +248,8 @@ public class MessageServer extends Thread  {
             return clients;
         }
     }
+
+    public static void main(String[] args) throws IOException {
+        MessageServer messageServer= new MessageServer(434);
+    }
 }
