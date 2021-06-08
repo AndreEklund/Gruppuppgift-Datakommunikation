@@ -45,7 +45,7 @@ public class WriteThread extends Thread implements PropertyChangeListener {
                     wait();
                 } catch (InterruptedException e) {
                     System.err.println(e);
-                    interrupt();
+                    break;
                 }
 
                 oos.writeObject(message);

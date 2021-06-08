@@ -55,6 +55,7 @@ public class ReadThread extends Thread {
 
             } catch (IOException | ClassNotFoundException e) {
                 messageClient.disconnect();
+                break;
             }
 
         }

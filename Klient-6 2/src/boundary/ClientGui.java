@@ -36,8 +36,7 @@ public class ClientGui extends JFrame {
     private ImageIcon image;
     private OnlineUsers onlinePanel;
     private ContactsPopup contactsPanel;
-    //private String ip = "127.0.0.1";
-    private String ip = "127.0.01";
+    private String ip = "127.0.0.1";
     private int port = 434;
 
     /**
