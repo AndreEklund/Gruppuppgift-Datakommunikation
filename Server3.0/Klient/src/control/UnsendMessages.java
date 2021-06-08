@@ -1,4 +1,4 @@
-package Server;
+package control;
 
 import entity.Message;
 import entity.User;

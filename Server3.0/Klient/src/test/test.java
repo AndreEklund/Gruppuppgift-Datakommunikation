@@ -1,15 +1,8 @@
 package test;
 
-import Server.MessageServer;
-import entity.Message;
-import entity.User;
+import control.MessageServer;
 
-import javax.swing.*;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
-import java.util.ArrayList;
-
 
 
 public class test {
