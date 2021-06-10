@@ -149,14 +149,15 @@ public class MessageServer extends Thread  {
             user = message.getUser();
             trafficLog.info("User " + user.getUserName() + " connected");
             clients.put(user, this);
+            ObjectOutputStream oosReceiver;
 
             ArrayList<Message> pendingMessages = unsendMessages.getArrayList(message.getUser());
             if (pendingMessages != null) {
                 for (Message m : pendingMessages) {
                     trafficLog.info("Sending unsent messages to " + user.getUserName());
-                    oos = clients.get(user).oos;
-                    oos.writeObject(m);
-                    oos.flush();
+                    oosReceiver = clients.get(user).getOos();
+                    oosReceiver.writeObject(m);
+                    oosReceiver.flush();
                     trafficLog.info("Message from " + m.getUser().getUserName() +
                             " sent to " + user.getUserName());
                 }
@@ -178,6 +179,7 @@ public class MessageServer extends Thread  {
                 for (User key : clients.clients.keySet()) {
                     if (receiver.equals(key)) {
                         oosReceiver = clients.get(receiver).getOos();
+                        oosReceiver.reset();
                         oosReceiver.writeObject(message);
 
                         oosReceiver.flush();
@@ -218,6 +220,7 @@ public class MessageServer extends Thread  {
             OnlineListMessage listMessage = new OnlineListMessage(list);
             for (User receiver : clients.clients.keySet()) {
                 oosReceiver = clients.get(receiver).getOos();
+                oosReceiver.reset();
                 oosReceiver.writeObject(listMessage);
                 oosReceiver.flush();
             }
