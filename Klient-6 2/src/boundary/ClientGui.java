@@ -170,6 +170,7 @@ public class ClientGui extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                messageListGUI.clear();
                 for (int i=0; i<list.size(); i++) {
                     messageListGUI.addElement(list.get(i));
                 }
